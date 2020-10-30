@@ -16,8 +16,10 @@ Time: O(m^(d/2)) Space: O(md), where m is the number of legal moves and d is the
 
 ## Sources 
 
-[Minimax] (https://en.wikipedia.org/wiki/Minimax)
-[Game tree] (https://en.wikipedia.org/wiki/Game_tree)
-[m,n,k game] (https://en.wikipedia.org/wiki/M,n,k-game)
+[Minimax](https://en.wikipedia.org/wiki/Minimax)
+
+[Game tree](https://en.wikipedia.org/wiki/Game_tree)
+
+[m,n,k game](https://en.wikipedia.org/wiki/M,n,k-game)
 
 * Curriculum: Bachelor of Computer Science
