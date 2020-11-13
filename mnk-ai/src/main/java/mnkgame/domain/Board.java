@@ -10,6 +10,7 @@ package mnkgame.domain;
  * @author julinden
  */
 public class Board {
+
     public final int m;
     public final int n;
     public final int k;
@@ -20,7 +21,10 @@ public class Board {
         return grid;
     }
 
-    
+    public void setGrid(int[][] grid) {
+        this.grid = grid;
+    }
+
     public Board(int m, int n, int k) {
         this.m = m;
         this.n = n;
@@ -28,6 +32,12 @@ public class Board {
         this.grid = new int[n][m];
     }
     
+    public Board makeCopy() {
+        Board copyBoard = new Board(m, n, k);
+        copyBoard.setGrid(copyGrid());
+        return copyBoard;
+    }
+
     public Boolean placeStone(int id, int x, int y) {
         if (this.grid[y][x] == 0) {
             this.grid[y][x] = id;
@@ -35,12 +45,20 @@ public class Board {
         }
         return false;
     }
-    
+
+    public void removeStone(int x, int y) {
+        this.grid[y][x] = 0;
+    }
+
     public boolean checkWin(int id) {
-        return checkWinVert(id) || checkWinHor(id) || checkWinDiag(id);
-        
+        return checkWinVert(id) || checkWinHor(id) || checkWinDiag(id); 
     }
     
+    /**
+     * Vertical check
+     * @param id
+     * @return
+     */
     public boolean checkWinVert(int id) {
         for (int i = 0; i < m; i++) {
             int howMany = 0;
@@ -60,6 +78,11 @@ public class Board {
         return false;
     }
     
+    /**
+     * Horizontal check
+     * @param id
+     * @return
+     */
     public boolean checkWinHor(int id) {
         for (int i = 0; i < n; i++) {
             int howMany = 0;
@@ -79,6 +102,11 @@ public class Board {
         return false;
     }
     
+    /**
+     * Check for both diagonal and antidiagonal
+     * @param id
+     * @return
+     */
     public boolean checkWinDiag(int id) {
         for (int i = 0; i < m; i++) {
             if (diagCheck(id, i, 0) || antiDiagCheck(id, i, n - 1)) {
@@ -93,6 +121,13 @@ public class Board {
         return false;
     }
     
+    /**
+     * Diagonal check
+     * @param id
+     * @param x
+     * @param y
+     * @return
+     */
     public boolean diagCheck(int id, int x, int y) {
         int howMany = 0;
         int xx = x;
@@ -113,6 +148,13 @@ public class Board {
         return false;
     }
     
+    /**
+     * Antidiagonal check
+     * @param id
+     * @param x
+     * @param y
+     * @return
+     */
     public boolean antiDiagCheck(int id, int x, int y) {
         int howMany = 0;
         int xx = x;
@@ -144,6 +186,20 @@ public class Board {
         return true;
     }
     
+    public int[][] copyGrid() {
+        int[][] copy = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                copy[i][j] = this.grid[i][j];
+            }
+        }
+        return copy;
+    }
+    
+    /**
+     * Method to print the state of the board
+     * @return
+     */
     @Override
     public String toString() { 
         String s = "";

@@ -10,6 +10,7 @@ import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -21,6 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import mnkgame.domain.Ai;
 import mnkgame.domain.GameLogic;
 
 /**
@@ -29,6 +31,7 @@ import mnkgame.domain.GameLogic;
  */
 public class MnkGameUi extends Application{
     private GameLogic logic;
+    private Ai ai;
     private Stage stage;
     
     private Scene gameSetupScene;
@@ -72,7 +75,8 @@ public class MnkGameUi extends Application{
                 if ( tempGridWidth > 2 && tempGridWidth < 16 && tempGridHeight > 2 && tempGridHeight < 16){
                     if(tempK > 2 && tempK <= max(tempGridWidth, tempGridHeight)) {
                         logic.newGame(tempGridWidth, tempGridHeight, tempK);
-
+                        this.ai = new Ai(this.logic);
+                        System.out.println("new ai");
                         errorMessage.setText("");
                         this.mainScene = createMainScene();
                         sceneChange(this.mainScene);
@@ -106,14 +110,10 @@ public class MnkGameUi extends Application{
         BorderPane gamePane = new BorderPane();
         
         Font equalSizeFont = Font.font("Monospaced", 30);
-        
+        System.out.println("current: " + logic.getCurrentPlayer());
         String playerTurn;
-        if(logic.getCurrentPlayer() == 1) {
-            playerTurn = "X";
-        } else {
-            playerTurn = "O";
-        }
-        Label turnLabel = new Label(playerTurn + "'s turn");
+
+        Label turnLabel = new Label(playerString(logic.getCurrentPlayer()) + "'s turn");
         turnLabel.setFont(equalSizeFont);
         gamePane.setTop(turnLabel);
         
@@ -122,6 +122,7 @@ public class MnkGameUi extends Application{
         grid.setVgap(10);
         grid.setPadding(new Insets(10,10,10,10));
         
+        Button[][] buttons = new Button[logic.getBoard().n][logic.getBoard().m];
         for(int i=0; i < logic.getBoard().n; i++) {
             for(int j=0; j < logic.getBoard().m; j++) {
                 int stoneValue = logic.getBoard().getGrid()[i][j];
@@ -141,30 +142,59 @@ public class MnkGameUi extends Application{
                 button.setFont(equalSizeFont);
                 
                 grid.add(button, j, i);
+                buttons[j][i] = button;
+                
                 
                 int xx = j;
                 int yy = i;
-                
+
                 button.setOnAction((event) -> {
+                    System.out.println("nappia painettu");
                     if(logic.stonePlacer(xx, yy)) {
-                        button.setText(playerTurn);
-                        if(logic.checkWin()){
+                        button.setText(playerString(logic.getCurrentPlayer()));
+                        if(logic.checkWin() || logic.checkFull()){
                             start(stage);
                         } else {
                             logic.changePlayer();
-                            this.mainScene = createMainScene();
-                            sceneChange(this.mainScene);
+                            turnLabel.setText(playerString(logic.getCurrentPlayer()) + "'s turn");
+                            if (logic.getCurrentPlayer() == -1) {
+                                int[] aiMove = ai.bestMoveFinder(-1);
+                                Button buttonAi = buttons[aiMove[0]][aiMove[1]];
+                                buttonAi.fire();
+                            }
                         }
                     } else {
                         ;
                     }
                 });
+                
+                
             }
         }
+        
+        
+        
         
         gamePane.setCenter(grid);
         mainScene = new Scene(gamePane, 800,800);
         return mainScene;
+    }
+    
+    private Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
+    for (Node node : gridPane.getChildren()) {
+        if (GridPane.getColumnIndex(node) == col && GridPane.getRowIndex(node) == row) {
+            return node;
+        }
+    }
+    return null;
+    }
+    
+    private String playerString(int playerNumber) {
+        if (playerNumber == 1) {
+            return "X";
+        } else {
+            return "O";
+        }
     }
     
     @Override
