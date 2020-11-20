@@ -11,3 +11,5 @@
 [Weekly report 2 ](documentation/weekly_report_2.md)
 
 [Weekly report 3 ](documentation/weekly_report_3.md)
+
+[Weekly report 4 ](documentation/weekly_report_4.md)

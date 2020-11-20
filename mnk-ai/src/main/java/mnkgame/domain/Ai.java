@@ -131,7 +131,11 @@ public class Ai {
                     int tempValue = minValue(alpha, beta);
                     v = Math.max(v, tempValue);
                     board.removeStone(j, i);
-                    //return v;
+                    alpha = Math.max(alpha, v);
+                    if (alpha >= beta) {
+                        return v;
+                    }
+                    
                 }
             }
         }
@@ -163,7 +167,10 @@ public class Ai {
                     int tempValue = maxValue(alpha, beta);
                     v = Math.min(v, tempValue);
                     board.removeStone(j, i);
-                    //return v;
+                    beta = Math.min(beta, v);
+                    if (beta <= alpha) {
+                        return v;
+                    }
                 }
             }
         }

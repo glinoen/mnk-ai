@@ -122,7 +122,7 @@ public class MnkGameUi extends Application{
         grid.setVgap(10);
         grid.setPadding(new Insets(10,10,10,10));
         
-        Button[][] buttons = new Button[logic.getBoard().n][logic.getBoard().m];
+        Button[][] buttons = new Button[logic.getBoard().m][logic.getBoard().n];
         for(int i=0; i < logic.getBoard().n; i++) {
             for(int j=0; j < logic.getBoard().m; j++) {
                 int stoneValue = logic.getBoard().getGrid()[i][j];
