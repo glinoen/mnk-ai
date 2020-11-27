@@ -34,4 +34,6 @@ public class AiTest {
         assertEquals(1, move[0]);
         assertEquals(2, move[1]);
     }
+    
+    
 }

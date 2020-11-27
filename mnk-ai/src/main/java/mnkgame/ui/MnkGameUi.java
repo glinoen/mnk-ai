@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import mnkgame.domain.Ai;
+import mnkgame.domain.AiGomoku;
 import mnkgame.domain.GameLogic;
 
 /**
