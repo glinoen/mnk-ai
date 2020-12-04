@@ -5,6 +5,8 @@
  */
 package mnkgame.domain;
 
+import java.util.Stack;
+
 /**
  *
  * @author julinden
@@ -16,6 +18,7 @@ public class Board {
     public final int k;
     
     private int[][] grid;
+    private Stack<int[]> occupiedSquares;
 
     public int[][] getGrid() {
         return grid;
@@ -30,6 +33,7 @@ public class Board {
         this.n = n;
         this.k = k;
         this.grid = new int[n][m];
+        this.occupiedSquares = new Stack<>();
     }
     
     public Board makeCopy() {
@@ -41,6 +45,8 @@ public class Board {
     public Boolean placeStone(int id, int x, int y) {
         if (this.grid[y][x] == 0) {
             this.grid[y][x] = id;
+            int[] coordinate = new int[]{y,x};
+            this.occupiedSquares.push(coordinate);
             return true;
         }
         return false;
@@ -48,6 +54,15 @@ public class Board {
 
     public void removeStone(int x, int y) {
         this.grid[y][x] = 0;
+        this.occupiedSquares.pop();
+    }
+
+    public Stack<int[]> getOccupiedSquares() {
+        return occupiedSquares;
+    }
+
+    public void setOccupiedSquares(Stack<int[]> occupiedSquares) {
+        this.occupiedSquares = occupiedSquares;
     }
 
     public boolean checkWin(int id) {
@@ -371,8 +386,11 @@ public class Board {
         if(count == k-2 && start && end) {
             return 10000;
         }
-        if(count == k-1 && (start || end) || count == k-3 && start && end) {
+        if(count == k-1 && (start || end)) {
             return 5000;
+        }
+        if(count == k-3 && start && end) {
+            return 4000;
         }
         if(count == k-2 && (start || end)) {
             return 2500;
@@ -404,7 +422,14 @@ public class Board {
             String tempS = "";
             for (int j = 0; j < m; j++) {
                 int stoneValue = this.grid[i][j];
-                tempS = tempS.concat(Integer.toString(stoneValue) + " ");
+                if(stoneValue == 1) {
+                    tempS = tempS.concat(Integer.toString(stoneValue) + " ");
+                } else if(stoneValue == 0) {
+                    tempS = tempS.concat("|" + " ");
+                } else{
+                    tempS = tempS.concat("0" + " ");
+                }
+                
             }
             s = s.concat(tempS + " \n");
         }

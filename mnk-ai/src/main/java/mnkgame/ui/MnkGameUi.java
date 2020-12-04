@@ -32,6 +32,7 @@ import mnkgame.domain.GameLogic;
  */
 public class MnkGameUi extends Application{
     private GameLogic logic;
+    private AiGomoku aiG;
     private Ai ai;
     private Stage stage;
     
@@ -76,7 +77,12 @@ public class MnkGameUi extends Application{
                 if ( tempGridWidth > 2 && tempGridWidth < 16 && tempGridHeight > 2 && tempGridHeight < 16){
                     if(tempK > 2 && tempK <= max(tempGridWidth, tempGridHeight)) {
                         logic.newGame(tempGridWidth, tempGridHeight, tempK);
-                        this.ai = new Ai(this.logic);
+                        if(tempK > 4) {
+                            this.aiG = new AiGomoku(this.logic, 3);
+                        } else {
+                            this.ai = new Ai(this.logic);
+                        }
+                        
                         System.out.println("new ai");
                         errorMessage.setText("");
                         this.mainScene = createMainScene();
@@ -159,7 +165,12 @@ public class MnkGameUi extends Application{
                             logic.changePlayer();
                             turnLabel.setText(playerString(logic.getCurrentPlayer()) + "'s turn");
                             if (logic.getCurrentPlayer() == -1) {
-                                int[] aiMove = ai.bestMoveFinder(-1);
+                                int[] aiMove = new int[2];
+                                if(logic.getBoard().k > 4) {
+                                    aiMove = aiG.bestMoveFinder(-1);
+                                } else {
+                                    aiMove = ai.bestMoveFinder(-1);
+                                }
                                 Button buttonAi = buttons[aiMove[0]][aiMove[1]];
                                 buttonAi.fire();
                             }

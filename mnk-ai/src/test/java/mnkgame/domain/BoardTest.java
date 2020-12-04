@@ -15,10 +15,12 @@ import org.junit.Test;
  */
 public class BoardTest {
     GameLogic logic;
+    AiGomoku aiG;
     
     @Before
     public void setUp() {
-        this.logic = new GameLogic();    
+        this.logic = new GameLogic(); 
+        this.aiG = new AiGomoku(logic, 6);
     }
     
     @Test
@@ -80,6 +82,23 @@ public class BoardTest {
         System.out.println("");
         assertEquals(15000, logic.getBoard().evalDiagonals());
     }
+    
+//    @Test
+//    public void evalDiagonal2() {
+//        logic.newGame(15,15,5);
+//        logic.stonePlacer(1,1);
+//        logic.stonePlacer(2,2);
+//        logic.stonePlacer(3,3);
+//        logic.changePlayer();
+//        logic.stonePlacer(1,2);
+//        logic.stonePlacer(2,3);
+//        int[] move = aiG.bestMoveFinder(-1);
+//        System.out.println(move[0] + " " + move[1]);
+//        System.out.println("DIAG2");
+//        System.out.println(logic.getBoard());
+//        System.out.println("");
+//        assertEquals(0, logic.getBoard().evalBoard());
+//    }
     
     @Test
     public void evalAntiDiagonal() {
