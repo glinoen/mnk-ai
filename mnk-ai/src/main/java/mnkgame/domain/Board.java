@@ -5,7 +5,9 @@
  */
 package mnkgame.domain;
 
-import java.util.Stack;
+import datastructures.Stack;
+
+
 
 /**
  *
@@ -16,9 +18,10 @@ public class Board {
     public final int m;
     public final int n;
     public final int k;
-    
+    public final int winValue;
+    private int win;
     private int[][] grid;
-    private Stack<int[]> occupiedSquares;
+    private Stack occupiedSquares;
 
     public int[][] getGrid() {
         return grid;
@@ -32,8 +35,10 @@ public class Board {
         this.m = m;
         this.n = n;
         this.k = k;
+        this.winValue = 10000000;
+        this.win = 0;
         this.grid = new int[n][m];
-        this.occupiedSquares = new Stack<>();
+        this.occupiedSquares = new Stack(m,n);
     }
     
     public Board makeCopy() {
@@ -57,16 +62,17 @@ public class Board {
         this.occupiedSquares.pop();
     }
 
-    public Stack<int[]> getOccupiedSquares() {
+    public Stack getOccupiedSquares() {
         return occupiedSquares;
     }
 
-    public void setOccupiedSquares(Stack<int[]> occupiedSquares) {
-        this.occupiedSquares = occupiedSquares;
-    }
 
     public boolean checkWin(int id) {
         return checkWinVert(id) || checkWinHor(id) || checkWinDiag(id); 
+    }
+    
+    public boolean checkWin() {
+        return this.win != 0; 
     }
     
     
@@ -193,18 +199,24 @@ public class Board {
     }
     
     public boolean checkFull() {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (this.grid[i][j] == 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return this.occupiedSquares.getTop() == this.m*this.n-1;
     }
     
     public int evalBoard() {
-        return evalBoardVert()+evalBoardHor()+evalDiagonals();
+        this.win = 0;
+        int vert = evalBoardVert();
+        if (win != 0) {
+            return win * winValue;
+        }
+        int hor = evalBoardHor();
+        if (win != 0) {
+            return win * winValue;
+        }
+        int diag = evalDiagonals();
+        if (win != 0) {
+            return win * winValue;
+        }
+        return vert + hor + diag;
     }
     
     public int evalBoardVert() {
@@ -217,6 +229,10 @@ public class Board {
                 int stoneValueCurrent = this.grid[j][i];
                 if (stoneValueCurrent != 0) {
                     howMany++;
+                    if(howMany == k) {
+                        this.win = stoneValueCurrent;
+                        return 0;
+                    }
                     if(j < n-1) {
                         int stoneValueNext = this.grid[j+1][i];
                         if(stoneValueNext == stoneValueCurrent) {
@@ -255,6 +271,10 @@ public class Board {
                 int stoneValueCurrent = this.grid[i][j];
                 if (stoneValueCurrent != 0) {
                     howMany++;
+                    if(howMany == k) {
+                        this.win = stoneValueCurrent;
+                        return 0;
+                    }
                     if(j < n-1) {
                         int stoneValueNext = this.grid[i][j+1];
                         if(stoneValueNext == stoneValueCurrent) {
@@ -295,6 +315,10 @@ public class Board {
             int stoneValueCurrent = this.grid[yy][xx];
             if (stoneValueCurrent != 0) {
                 howMany++;
+                if(howMany == k) {
+                    this.win = stoneValueCurrent;
+                    return 0;
+                }
                 if(yy < n-1 && xx < m - 1) {
                     int stoneValueNext = this.grid[yy+1][xx+1];
                     if(stoneValueNext == stoneValueCurrent) {
@@ -335,6 +359,10 @@ public class Board {
             int stoneValueCurrent = this.grid[yy][xx];
             if (stoneValueCurrent != 0) {
                 howMany++;
+                if(howMany == k) {
+                    this.win = stoneValueCurrent;
+                    return 0;
+                }
                 if(yy > 0 && xx < m - 1) {
                     int stoneValueNext = this.grid[yy-1][xx+1];
                     if(stoneValueCurrent == stoneValueNext) {
@@ -378,7 +406,7 @@ public class Board {
     
     public int checkValue(int count, boolean start, boolean end) {
         if(count == k) {
-            return 100000;
+            return 10000000;
         }
         if(count == k-1 && start && end) {
             return 15000;

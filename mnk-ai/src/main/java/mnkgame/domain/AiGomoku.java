@@ -4,10 +4,12 @@
  * and open the template in the editor.
  */
 package mnkgame.domain;
+import datastructures.Stack;
 import java.math.*;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
+
 /**
  *
  * @author julinden
@@ -17,6 +19,8 @@ public class AiGomoku {
     private int bigNumber;
     private Board board;
     private int depth;
+    private HashMap<String, Integer> calculatedValues;
+    private int[] coordinate;
     
     /**
      *
@@ -27,12 +31,15 @@ public class AiGomoku {
         this.bigNumber = 999999;
         this.board = this.logic.getBoard();
         this.depth = depth;
+        this.calculatedValues = new HashMap<>();
+        this.coordinate = new int[2];
     }
     
     public Set<int[]> emptySquaresNearOccupied() {
         Set<int[]> emptySquares = new HashSet<>();
-        Stack<int[]> occupiedSquares = board.getOccupiedSquares();
-        for(int[] coordinate : occupiedSquares) {
+        Stack occupiedSquares = board.getOccupiedSquares();
+        for(int z = 0; z<=occupiedSquares.getTop(); z++) {
+            int[] coordinate = occupiedSquares.get(z);
             int i = coordinate[0];
             int j = coordinate[1];
             if (board.getGrid()[i][j] != 0) {
@@ -90,26 +97,43 @@ public class AiGomoku {
     }
     
     /**
-     * Finds the best move the current situation
+     * Finds the best move for the current situation
      * @param player
      * @return coordinates of the best move
      */
     public int[] bestMoveFinder(int player) {
         int[] bestMove = new int[2];
-        int value = Integer.MAX_VALUE;
+        if(board.getOccupiedSquares().empty()) {
+            System.out.println("firstAi");
+            bestMove[0] = board.m/2;
+            bestMove[1] = board.n/2;
+            return bestMove;
+        }
+        int value;
         Set<int[]> emptySquares = emptySquaresNearOccupied();
-        for (int[] coordinate : emptySquares) {
-            board.placeStone(player, coordinate[1], coordinate[0]);
-            int boardValue = alphaBetaValue(-player);
-            board.removeStone(coordinate[1], coordinate[0]);
-            if (boardValue < value) {
-                value = boardValue;
-                bestMove[0] = coordinate[1];
-                bestMove[1] = coordinate[0];
-                System.out.println(value);
-                System.out.println(coordinate[1]);
-                System.out.println(coordinate[0]);
-                System.out.println("");
+        if(player == -1) {
+            value = Integer.MAX_VALUE;
+            for (int[] coordinate : emptySquares) {
+                board.placeStone(-1, coordinate[1], coordinate[0]);
+                int boardValue = maxValue(-20000000, 20000000, depth);
+                board.removeStone(coordinate[1], coordinate[0]);
+                if (boardValue < value) {
+                    value = boardValue;
+                    bestMove[0] = coordinate[1];
+                    bestMove[1] = coordinate[0];
+                }
+            }
+        } else {
+            value = Integer.MIN_VALUE;
+            for (int[] coordinate : emptySquares) {
+                board.placeStone(1, coordinate[1], coordinate[0]);
+                int boardValue = minValue(-20000000, 20000000, depth);
+                board.removeStone(coordinate[1], coordinate[0]);
+                if (boardValue > value) {
+                    value = boardValue;
+                    bestMove[0] = coordinate[1];
+                    bestMove[1] = coordinate[0];
+                }
             }
         }
         
@@ -166,10 +190,19 @@ public class AiGomoku {
      */
     public int alphaBetaValue(int player) {
         if (player ==  1) {
-            return maxValue(-100000, 100000, depth);
+            return maxValue(-20000000, 20000000, depth);
         } else {
-            return minValue(-100000, 100000, depth);
+            return minValue(-20000000, 20000000, depth);
         }
+    }
+    
+    public int evalBoard() {
+        Integer boardValue = this.calculatedValues.get(board.toString());
+        if(boardValue == null) {
+            boardValue = board.evalBoard();
+            this.calculatedValues.put(board.toString(), boardValue);
+        }
+        return boardValue;
     }
     
     /**
@@ -179,19 +212,15 @@ public class AiGomoku {
      * @return
      */
     public int maxValue(int alpha, int beta, int depth) {
-        if(depth == 0) {
-            int evalboard = board.evalBoard();
-            return evalboard;
-        }
-        if (board.checkWin(-1)) {
-            return -100000;
-        }
-        if (board.checkWin(1)) {
-            return 100000;
+        int boardValue = evalBoard();
+        if(depth == 0 || boardValue == 10000000 || boardValue == -10000000) {
+            return boardValue;
         }
         if (board.checkFull()) {
             return 0;
         }
+
+        
         int v = Integer.MIN_VALUE;
         
         Set<int[]> emptySquares = emptySquaresNearOccupied();
@@ -203,7 +232,7 @@ public class AiGomoku {
                 board.removeStone(coordinate[1], coordinate[0]);
                 alpha = Math.max(alpha, v);
                 if (alpha >= beta) {
-                        return v;
+                    return v;
                 }
             }
         }
@@ -234,15 +263,9 @@ public class AiGomoku {
      * @return
      */
     public int minValue(int alpha, int beta, int depth) {
-        if(depth == 0) {
-            int evalboard = board.evalBoard();
-            return evalboard;
-        }
-        if (board.checkWin(1)) {
-            return 100000;
-        }
-        if (board.checkWin(-1)) {
-            return -100000;
+        int boardValue = evalBoard();
+        if(depth == 0 || boardValue == 10000000 || boardValue == -10000000) {
+            return boardValue;
         }
         if (board.checkFull()) {
             return 0;

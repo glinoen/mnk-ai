@@ -13,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -38,6 +39,8 @@ public class MnkGameUi extends Application{
     
     private Scene gameSetupScene;
     private Scene mainScene;
+    private boolean firstTurn;
+    private int bot;
     
     @Override
     public void init() throws Exception { 
@@ -63,8 +66,9 @@ public class MnkGameUi extends Application{
         TextField gridHeightInput = new TextField();
         Label kLabel = new Label("Enter k (smaller than the largest dimension, minimum 3)");
         TextField kInput = new TextField();
-        
-        inputPane.getChildren().addAll(gridWidthLabel, gridWidthInput, gridHeightLabel, gridHeightInput, kLabel, kInput);
+        CheckBox aiStartCheck = new CheckBox("Ai starts the game(otherwise you start)");
+        CheckBox aiCheck = new CheckBox("Ai vs Ai");
+        inputPane.getChildren().addAll(gridWidthLabel, gridWidthInput, gridHeightLabel, gridHeightInput, kLabel, kInput,aiStartCheck, aiCheck);
         Label errorMessage = new Label();
         
         Button startButton = new Button("Start Game");
@@ -77,7 +81,7 @@ public class MnkGameUi extends Application{
                 if ( tempGridWidth > 2 && tempGridWidth < 16 && tempGridHeight > 2 && tempGridHeight < 16){
                     if(tempK > 2 && tempK <= max(tempGridWidth, tempGridHeight)) {
                         logic.newGame(tempGridWidth, tempGridHeight, tempK);
-                        if(tempK > 4) {
+                        if(tempK > 3) {
                             this.aiG = new AiGomoku(this.logic, 3);
                         } else {
                             this.ai = new Ai(this.logic);
@@ -85,7 +89,19 @@ public class MnkGameUi extends Application{
                         
                         System.out.println("new ai");
                         errorMessage.setText("");
-                        this.mainScene = createMainScene();
+                        if(aiStartCheck.isSelected()) {
+                            int[] aiMove = new int[2];
+                            aiMove = aiG.bestMoveFinder(logic.getCurrentPlayer());
+                            this.bot = 1;
+                            logic.stonePlacer(aiMove[0], aiMove[1]);   
+                            logic.changePlayer();
+
+                        } else {
+                            this.bot = -1;
+                        }
+                        this.mainScene = aiCheck.isSelected() ? createMainSceneAi() : createMainScene();
+                        
+                        this.firstTurn = true;
                         sceneChange(this.mainScene);
                         gridWidthInput.setText("");
                         gridHeightInput.setText("");
@@ -154,22 +170,24 @@ public class MnkGameUi extends Application{
                 
                 int xx = j;
                 int yy = i;
+                
 
                 button.setOnAction((event) -> {
                     System.out.println("nappia painettu");
                     if(logic.stonePlacer(xx, yy)) {
                         button.setText(playerString(logic.getCurrentPlayer()));
                         if(logic.checkWin() || logic.checkFull()){
-                            start(stage);
+                            turnLabel.setText("GAME OVER");
+                            // start(stage);
                         } else {
                             logic.changePlayer();
                             turnLabel.setText(playerString(logic.getCurrentPlayer()) + "'s turn");
-                            if (logic.getCurrentPlayer() == -1) {
+                            if (logic.getCurrentPlayer() == this.bot) {
                                 int[] aiMove = new int[2];
                                 if(logic.getBoard().k > 4) {
-                                    aiMove = aiG.bestMoveFinder(-1);
+                                    aiMove = aiG.bestMoveFinder(this.bot);
                                 } else {
-                                    aiMove = ai.bestMoveFinder(-1);
+                                    aiMove = ai.bestMoveFinder(this.bot);
                                 }
                                 Button buttonAi = buttons[aiMove[0]][aiMove[1]];
                                 buttonAi.fire();
@@ -183,6 +201,91 @@ public class MnkGameUi extends Application{
                 
             }
         }
+        
+        
+        
+        
+        gamePane.setCenter(grid);
+        mainScene = new Scene(gamePane, 800,800);
+        return mainScene;
+    }
+    
+    private Scene createMainSceneAi() {
+        BorderPane gamePane = new BorderPane();
+        
+        Font equalSizeFont = Font.font("Monospaced", 30);
+        System.out.println("current: " + logic.getCurrentPlayer());
+        String playerTurn;
+        
+
+        Label turnLabel = new Label(playerString(logic.getCurrentPlayer()) + "'s turn");
+        turnLabel.setFont(equalSizeFont);
+        gamePane.setTop(turnLabel);
+        
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10,10,10,10));
+        
+        Button[][] buttons = new Button[logic.getBoard().m][logic.getBoard().n];
+        for(int i=0; i < logic.getBoard().n; i++) {
+            for(int j=0; j < logic.getBoard().m; j++) {
+                int stoneValue = logic.getBoard().getGrid()[i][j];
+                String buttonValue = " ";
+                switch(stoneValue) {
+                    case 1:
+                        buttonValue = "X";
+                        break;
+                    case -1:
+                        buttonValue = "O";
+                        break;
+                    case 0:
+                        buttonValue = " ";
+                        break;
+                }
+                Button button = new Button(buttonValue);
+                button.setFont(equalSizeFont);
+                
+                grid.add(button, j, i);
+                buttons[j][i] = button;
+                
+                
+                int xx = j;
+                int yy = i;
+                
+
+                button.setOnAction((event) -> {
+                    System.out.println("nappia painettu");
+                    if(logic.stonePlacer(xx, yy)) {
+                        button.setText(playerString(logic.getCurrentPlayer()));
+                        if(logic.checkWin() || logic.checkFull()){
+                            start(stage);
+                        } else {
+                            logic.changePlayer();
+                            turnLabel.setText(playerString(logic.getCurrentPlayer()) + "'s turn");
+                            int[] aiMove = new int[2];
+                            aiMove = aiG.bestMoveFinder(logic.getCurrentPlayer());
+                            Button buttonAi = buttons[aiMove[0]][aiMove[1]];
+                            buttonAi.fire();
+                            
+                        }
+                    } else {
+                        ;
+                    }
+                });
+                
+                
+                
+            }
+        }
+        if(this.firstTurn) {
+            int[] aiMove = new int[2];
+            aiMove = aiG.bestMoveFinder(logic.getCurrentPlayer());
+            this.firstTurn = false;
+            Button buttonAi = buttons[aiMove[0]][aiMove[1]];
+            buttonAi.fire();
+        }
+        
         
         
         
