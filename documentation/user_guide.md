@@ -3,7 +3,7 @@
 ## Running the program without cloning
 Download the release, go to the directory containing the release and run 
 ```
- mvn compile exec:java -Dexec.mainClass=mnkgame.Main
+java -jar mnk-ai.jar
 ```
 
 ## Using the program and tests
