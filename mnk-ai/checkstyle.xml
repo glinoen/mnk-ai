@@ -11,8 +11,6 @@
         <property name='tabWidth' value='4' />
 
         <!-- Block Checks -->
-
-        <module name='EmptyBlock' />
         <module name='LeftCurly' />
         <module name='NeedBraces' />
         <module name='RightCurly' />
@@ -73,10 +71,6 @@
         <module name='TypecastParenPad' />
         <module name='WhitespaceAfter' />
 
-        <module name='WhitespaceAround'>
-            <property name='allowEmptyConstructors' value='true' />
-            <property name='allowEmptyMethods' value='true' />
-        </module>
     </module>
 
     <!-- File Length -->

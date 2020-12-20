@@ -38,25 +38,31 @@ public class Board {
         this.winValue = 10000000;
         this.win = 0;
         this.grid = new int[n][m];
-        this.occupiedSquares = new Stack(m,n);
-    }
-    
-    public Board makeCopy() {
-        Board copyBoard = new Board(m, n, k);
-        copyBoard.setGrid(copyGrid());
-        return copyBoard;
+        this.occupiedSquares = new Stack(m, n);
     }
 
+    /**
+     * If free, places stone on board and adds it to stack
+     * @param id
+     * @param x
+     * @param y
+     * @return
+     */
     public Boolean placeStone(int id, int x, int y) {
         if (this.grid[y][x] == 0) {
             this.grid[y][x] = id;
-            int[] coordinate = new int[]{y,x};
+            int[] coordinate = new int[]{y, x};
             this.occupiedSquares.push(coordinate);
             return true;
         }
         return false;
     }
 
+    /**
+     * Removes added stone from board and stack
+     * @param x
+     * @param y
+     */
     public void removeStone(int x, int y) {
         this.grid[y][x] = 0;
         this.occupiedSquares.pop();
@@ -71,14 +77,10 @@ public class Board {
         return checkWinVert(id) || checkWinHor(id) || checkWinDiag(id); 
     }
     
-    public boolean checkWin() {
-        return this.win != 0; 
-    }
-    
     
     
     /**
-     * Vertical check
+     * Vertical win check
      * @param id
      * @return
      */
@@ -102,7 +104,7 @@ public class Board {
     }
     
     /**
-     * Horizontal check
+     * Horizontal win check
      * @param id
      * @return
      */
@@ -202,6 +204,10 @@ public class Board {
         return this.occupiedSquares.getTop() == this.m*this.n-1;
     }
     
+    /**
+     * Evaluate board value in all direction, if winning combination detected it is returned
+     * @return
+     */
     public int evalBoard() {
         this.win = 0;
         int vert = evalBoardVert();
@@ -219,6 +225,10 @@ public class Board {
         return vert + hor + diag;
     }
     
+    /**
+     * Evaluate vertical combinations
+     * @return
+     */
     public int evalBoardVert() {
         int total = 0;
         for (int i = 0; i < m; i++) {
@@ -240,7 +250,8 @@ public class Board {
                         } else if(stoneValueNext == 0) {
                             end = true;
                             total += checkValue(howMany, start, end) * stoneValueCurrent;
-                            end = false; start = false;
+                            end = false; 
+                            start = false;
                             howMany = 0;
                         } else {
                             total += checkValue(howMany, start, end) * stoneValueCurrent; 
@@ -261,6 +272,10 @@ public class Board {
         return total;
     }
     
+    /**
+     * Evaluate horizontal combinations
+     * @return
+     */
     public int evalBoardHor() {
         int total = 0;
         for (int i = 0; i < n; i++) {
@@ -275,7 +290,7 @@ public class Board {
                         this.win = stoneValueCurrent;
                         return 0;
                     }
-                    if(j < n-1) {
+                    if(j < m-1) {
                         int stoneValueNext = this.grid[i][j+1];
                         if(stoneValueNext == stoneValueCurrent) {
                             
@@ -304,6 +319,12 @@ public class Board {
         return total;
     }
     
+    /**
+     * Evaluate diagonal combinations
+     * @param x
+     * @param y
+     * @return
+     */
     public int evalDiag(int x, int y) {
         int total = 0;
         int howMany = 0;
@@ -348,6 +369,12 @@ public class Board {
         return total;
     }
     
+    /**
+     * Evaluate antidiagonal combinations
+     * @param x
+     * @param y
+     * @return
+     */
     public int evalAntiDiag(int x, int y) {
         int total = 0;
         int howMany = 0;
@@ -393,6 +420,10 @@ public class Board {
         return total;
     }
     
+    /**
+     * Helper method for diagonal evalution
+     * @return
+     */
     public int evalDiagonals() {
         int total = 0;
         for (int i = 0; i < m; i++) {
@@ -404,6 +435,13 @@ public class Board {
         return total;
     }
     
+    /**
+     * Heuristic value of open and half-open combinations
+     * @param count
+     * @param start
+     * @param end
+     * @return
+     */
     public int checkValue(int count, boolean start, boolean end) {
         if(count == k) {
             return 10000000;
@@ -429,15 +467,6 @@ public class Board {
         return 0;
     }
     
-    public int[][] copyGrid() {
-        int[][] copy = new int[n][m];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                copy[i][j] = this.grid[i][j];
-            }
-        }
-        return copy;
-    }
     
     /**
      * Method to print the state of the board

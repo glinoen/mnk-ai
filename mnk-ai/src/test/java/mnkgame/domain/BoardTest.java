@@ -20,12 +20,11 @@ public class BoardTest {
     @Before
     public void setUp() {
         this.logic = new GameLogic(); 
-        this.aiG = new AiGomoku(logic, 6);
     }
     
     @Test
     public void evalBoardVertTest() {
-        logic.newGame(15,15,5);
+        logic.newGame(15,15,5,5);
         logic.stonePlacer(0, 0);
         logic.stonePlacer(0, 1);
         logic.stonePlacer(0, 2);
@@ -46,7 +45,7 @@ public class BoardTest {
     
     @Test
     public void evalBoardHorTest() {
-        logic.newGame(15,15,5);
+        logic.newGame(15,15,5,5);
         logic.stonePlacer(0,0);
         logic.stonePlacer(1,0);
         logic.stonePlacer(2,0);
@@ -67,7 +66,7 @@ public class BoardTest {
     
     @Test
     public void evalDiagonal() {
-        logic.newGame(15,15,5);
+        logic.newGame(15,15,5,5);
         logic.stonePlacer(0,0);
         logic.stonePlacer(1,1);
         logic.stonePlacer(2,2);
@@ -83,26 +82,9 @@ public class BoardTest {
         assertEquals(15000, logic.getBoard().evalDiagonals());
     }
     
-//    @Test
-//    public void evalDiagonal2() {
-//        logic.newGame(15,15,5);
-//        logic.stonePlacer(1,1);
-//        logic.stonePlacer(2,2);
-//        logic.stonePlacer(3,3);
-//        logic.changePlayer();
-//        logic.stonePlacer(1,2);
-//        logic.stonePlacer(2,3);
-//        int[] move = aiG.bestMoveFinder(-1);
-//        System.out.println(move[0] + " " + move[1]);
-//        System.out.println("DIAG2");
-//        System.out.println(logic.getBoard());
-//        System.out.println("");
-//        assertEquals(0, logic.getBoard().evalBoard());
-//    }
-    
     @Test
     public void evalAntiDiagonal() {
-        logic.newGame(15,15,5);
+        logic.newGame(15,15,5,5);
         logic.stonePlacer(0,14);
         logic.stonePlacer(1,13);
         logic.stonePlacer(2,12);
@@ -116,5 +98,15 @@ public class BoardTest {
         System.out.println(logic.getBoard());
         System.out.println("");
         assertEquals(15000, logic.getBoard().evalDiagonals());
+    }
+    
+    @Test
+    public void occupiedSquares() {
+        logic.newGame(10,10,5,3);
+        logic.stonePlacer(5, 4);
+        logic.stonePlacer(6, 4);
+        logic.stonePlacer(7, 4);
+        
+        assertEquals(2, this.logic.getBoard().getOccupiedSquares().getTop());
     }
 }

@@ -22,8 +22,18 @@ public class GameLogicTest {
     }
     
     @Test
+    public void emptySquares() {
+        logic.newGame(10,10,5,3);
+        logic.stonePlacer(5, 4);
+        logic.stonePlacer(6, 4);
+        logic.stonePlacer(7, 4);
+        
+        assertEquals(12, this.logic.getAi().emptySquaresNearOccupied().length);
+    }
+    
+    @Test
     public void horizontalWin() {
-        logic.newGame(8,7,5);
+        logic.newGame(8,7,5,3);
         for(int i=0; i<5;i++){
             logic.stonePlacer(i+1, 1);
         }
@@ -32,7 +42,7 @@ public class GameLogicTest {
     
     @Test
     public void verticalWin() {
-        logic.newGame(8,7,5);
+        logic.newGame(8,7,5,3);
         for(int i=0; i<5;i++){
             logic.stonePlacer(1, 6-i);
         }
@@ -41,7 +51,7 @@ public class GameLogicTest {
     
     @Test
     public void diagonalWin() {
-        logic.newGame(8,7,5);
+        logic.newGame(8,7,5,3);
         for(int i=0; i<5;i++){
             logic.stonePlacer(i, 1+i);
         }
@@ -50,7 +60,7 @@ public class GameLogicTest {
     
     @Test
     public void antiDiagonalWin() {
-        logic.newGame(8,7,5);
+        logic.newGame(8,7,5,3);
         for(int i=0; i<5;i++){
             logic.stonePlacer(i, 6-i);
         }
@@ -59,7 +69,7 @@ public class GameLogicTest {
     
     @Test
     public void boardIsFull() {
-        logic.newGame(15, 12, 3);
+        logic.newGame(15, 12, 3,3);
         for(int i=0; i<12; i++) {
             for(int j=0; j<15; j++) {
                 logic.stonePlacer(j, i);

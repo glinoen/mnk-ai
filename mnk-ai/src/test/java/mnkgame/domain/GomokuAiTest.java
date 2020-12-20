@@ -22,23 +22,102 @@ public class GomokuAiTest {
         this.logic = new GameLogic();    
     }
     
-//    @Test
-//    public void ticTacToeRightMove() {
-//        logic.newGame(15,15,5);
-//        this.ai = new AiGomoku(this.logic, 3);
-//        logic.stonePlacer(6, 7);
-//        logic.stonePlacer(7, 7);
-//        logic.stonePlacer(8, 7);
-//        logic.changePlayer();
-//        logic.stonePlacer(2, 5);
-//        logic.stonePlacer(3, 5);
-//        System.out.println(logic.getBoard().evalBoard());
-//        System.out.println(logic.getBoard());
-//        int[] move = ai.bestMoveFinder(-1);
-//        System.out.println("");
-//        System.out.println(move[0]);
-//        System.out.println(move[1]);
-//        assertEquals(1, move[0]);
-//        assertEquals(2, move[1]);
-//    }
+    
+    
+    @Test
+    public void blockOpenThree() {
+        logic.newGame(10,10,5,3);
+        this.ai = logic.getAi();
+        logic.stonePlacer(5, 4);
+        logic.stonePlacer(6, 4);
+        logic.stonePlacer(7, 4);
+        logic.changePlayer();
+        System.out.println(logic.getBoard());
+        int[] move = ai.bestMoveFinder(-1);
+        assertEquals(4, move[0]);
+        assertEquals(4, move[1]);
+    }
+    
+    @Test
+    public void winInsteadBlock() {
+        logic.newGame(10,10,5,3);
+        this.ai = logic.getAi();
+        logic.stonePlacer(5, 4);
+        logic.stonePlacer(6, 4);
+        logic.stonePlacer(7, 4);
+        logic.stonePlacer(8, 4);
+        logic.changePlayer();
+        logic.stonePlacer(5, 2);
+        logic.stonePlacer(6, 2);
+        logic.stonePlacer(7, 2);
+        logic.stonePlacer(8, 2);
+        System.out.println(logic.getBoard());
+        int[] move = ai.bestMoveFinder(-1);
+        assertEquals(4, move[0]);
+        assertEquals(2, move[1]);
+    }
+    
+    @Test
+    public void agressiveInsteadBlock() {
+        logic.newGame(10,10,5,3);
+        this.ai = logic.getAi();
+        logic.stonePlacer(5, 4);
+        logic.stonePlacer(6, 4);
+        logic.stonePlacer(7, 4);
+        logic.stonePlacer(5, 6);
+        logic.stonePlacer(6, 6);
+        logic.stonePlacer(7, 6);
+        logic.changePlayer();
+        logic.stonePlacer(5, 2);
+        logic.stonePlacer(6, 2);
+        logic.stonePlacer(7, 2);
+        System.out.println(logic.getBoard());
+        int[] move = ai.bestMoveFinder(-1);
+        assertEquals(4, move[0]);
+        assertEquals(2, move[1]);
+    }
+    
+    @Test
+    public void blockOpenThreeDifPlayer() {
+        logic.newGame(10,10,5,3);
+        this.ai = logic.getAi();
+        logic.changePlayer();
+        logic.stonePlacer(5, 4);
+        logic.stonePlacer(6, 4);
+        logic.stonePlacer(7, 4);
+        logic.changePlayer();
+        System.out.println(logic.getBoard());
+        int[] move = ai.bestMoveFinder(1);
+        assertEquals(4, move[0]);
+        assertEquals(4, move[1]);
+    }
+    
+    @Test
+    public void winInsteadBlockDifPlayer() {
+        logic.newGame(10,10,5,3);
+        this.ai = logic.getAi();
+        logic.stonePlacer(5, 4);
+        logic.stonePlacer(6, 4);
+        logic.stonePlacer(7, 4);
+        logic.stonePlacer(8, 4);
+        logic.changePlayer();
+        logic.stonePlacer(5, 2);
+        logic.stonePlacer(6, 2);
+        logic.stonePlacer(7, 2);
+        logic.stonePlacer(8, 2);
+        System.out.println(logic.getBoard());
+        int[] move = ai.bestMoveFinder(1);
+        assertEquals(4, move[0]);
+        assertEquals(4, move[1]);
+    }
+    
+    @Test
+    public void firstMoveInMiddle() {
+        logic.newGame(10,10,5,3);
+        this.ai = logic.getAi();
+        int[] move = ai.bestMoveFinder(-1);
+        assertEquals(5, move[0]);
+        assertEquals(5, move[1]);
+    }
+    
 }

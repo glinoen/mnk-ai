@@ -13,6 +13,7 @@ public class GameLogic {
     private Board board;
     private int k;
     private int currentPlayer;
+    private AiGomoku ai;
     
     /**
      *
@@ -22,15 +23,21 @@ public class GameLogic {
     }
     
     /**
-     * Creates a new game with empty board
+     * Creates a new game with custom size board and depth
      * @param m = width
      * @param n = height
      * @param k = how many in row to win
+     * @param depth = depth for minimax
      */
-    public void newGame(int m, int n, int k) {
+    public void newGame(int m, int n, int k, int depth) {
         this.board = new Board(m, n, k);
         this.k = k;
         this.currentPlayer = 1;
+        this.ai = new AiGomoku(this.board, depth);
+    }
+
+    public AiGomoku getAi() {
+        return ai;
     }
     
     /**

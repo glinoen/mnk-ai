@@ -4,39 +4,34 @@
  * and open the template in the editor.
  */
 package mnkgame.domain;
+import datastructures.HashMap;
 import datastructures.Stack;
-import java.math.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
  * @author julinden
  */
 public class AiGomoku {
-    private GameLogic logic;
-    private int bigNumber;
     private Board board;
     private int depth;
     private HashMap<String, Integer> calculatedValues;
-    private int[] coordinate;
     
     /**
      *
-     * @param logiikka
+     * @param depth depth of minimax
      */
-    public AiGomoku(GameLogic logiikka, int depth) {
-        this.logic = logiikka;
-        this.bigNumber = 999999;
-        this.board = this.logic.getBoard();
+    public AiGomoku(Board board, int depth) {
+        this.board = board;
         this.depth = depth;
-        this.calculatedValues = new HashMap<>();
-        this.coordinate = new int[2];
+        this.calculatedValues = new HashMap<>(99999999);
     }
     
-    public Set<int[]> emptySquaresNearOccupied() {
-        Set<int[]> emptySquares = new HashSet<>();
+    /**
+     * Find empty squares surrounding occupied ones
+     * @return array of coordinates
+     */
+    public Coordinate[] emptySquaresNearOccupied() {
+        HashMap<Coordinate, Integer> emptySquares = new HashMap<>(board.n * board.m);
         Stack occupiedSquares = board.getOccupiedSquares();
         for(int z = 0; z<=occupiedSquares.getTop(); z++) {
             int[] coordinate = occupiedSquares.get(z);
@@ -45,55 +40,48 @@ public class AiGomoku {
             if (board.getGrid()[i][j] != 0) {
                 if (j > 0) {
                     if(board.getGrid()[i][j-1] == 0) {
-                        emptySquares.add(coordinate(i,j-1));
+                        emptySquares.add(new Coordinate(i, j-1), null);
                     }
                     if (i > 0) {
                         if(board.getGrid()[i-1][j-1] == 0) {
-                            emptySquares.add(coordinate(i-1,j-1));
+                            emptySquares.add(new Coordinate(i-1, j-1), null);
                         }
                     }
                     if (i < board.n -1) {
                         if(board.getGrid()[i+1][j-1] == 0) {
-                            emptySquares.add(coordinate(i+1,j-1));
+                            emptySquares.add(new Coordinate(i+1, j-1), null);
                         }
                     }
                 }
                 if (j<board.m - 1) {
                     if(board.getGrid()[i][j+1] == 0) {
-                        emptySquares.add(coordinate(i,j+1));
+                        emptySquares.add(new Coordinate(i, j+1), null);
                     }
                     if (i > 0) {
                         if(board.getGrid()[i-1][j+1] == 0) {
-                            emptySquares.add(coordinate(i-1,j+1));
+                            emptySquares.add(new Coordinate(i-1, j+1), null);
                         }
                     }
                     if (i < board.n -1) {
                         if(board.getGrid()[i+1][j+1] == 0) {
-                            emptySquares.add(coordinate(i+1,j+1));
+                            emptySquares.add(new Coordinate(i+1, j+1), null);
                         }
                     }
                 }
                 if (i > 0) {
                     if(board.getGrid()[i-1][j] == 0) {
-                        emptySquares.add(coordinate(i-1,j));
+                        emptySquares.add(new Coordinate(i-1, j), null);
                     }
                 }
                 if (i < board.n - 1) {
                     if(board.getGrid()[i+1][j] == 0) {
-                        emptySquares.add(coordinate(i+1,j));
+                        emptySquares.add(new Coordinate(i+1, j), null);
                     }
                 }
             }
         }
         
-        return emptySquares;
-    }
-    
-    public int[] coordinate(int i, int j) {
-        int[] coordinate = new int[2];
-        coordinate[0] = i;
-        coordinate[1] = j;
-        return coordinate;
+        return emptySquares.getCoordinates();
     }
     
     /**
@@ -104,112 +92,59 @@ public class AiGomoku {
     public int[] bestMoveFinder(int player) {
         int[] bestMove = new int[2];
         if(board.getOccupiedSquares().empty()) {
-            System.out.println("firstAi");
             bestMove[0] = board.m/2;
             bestMove[1] = board.n/2;
             return bestMove;
         }
         int value;
-        Set<int[]> emptySquares = emptySquaresNearOccupied();
+        Coordinate[] emptySquares = emptySquaresNearOccupied();
         if(player == -1) {
             value = Integer.MAX_VALUE;
-            for (int[] coordinate : emptySquares) {
-                board.placeStone(-1, coordinate[1], coordinate[0]);
+            for (Coordinate coordinate : emptySquares) {
+                board.placeStone(-1, coordinate.x, coordinate.y);
                 int boardValue = maxValue(-20000000, 20000000, depth);
-                board.removeStone(coordinate[1], coordinate[0]);
+                board.removeStone(coordinate.x, coordinate.y);
                 if (boardValue < value) {
                     value = boardValue;
-                    bestMove[0] = coordinate[1];
-                    bestMove[1] = coordinate[0];
+                    bestMove[0] = coordinate.x;
+                    bestMove[1] = coordinate.y;
                 }
             }
         } else {
             value = Integer.MIN_VALUE;
-            for (int[] coordinate : emptySquares) {
-                board.placeStone(1, coordinate[1], coordinate[0]);
+            for (Coordinate coordinate : emptySquares) {
+                board.placeStone(1, coordinate.x, coordinate.y);
                 int boardValue = minValue(-20000000, 20000000, depth);
-                board.removeStone(coordinate[1], coordinate[0]);
+                board.removeStone(coordinate.x, coordinate.y);
                 if (boardValue > value) {
                     value = boardValue;
-                    bestMove[0] = coordinate[1];
-                    bestMove[1] = coordinate[0];
+                    bestMove[0] = coordinate.x;
+                    bestMove[1] = coordinate.y;
                 }
             }
         }
         
-        return bestMove;
-        
-        
-        
-//        
-//        if (player == 1) {
-//            value = -1;
-//            for (int i = 0; i < board.n; i++) {
-//                for (int j = 0; j < board.m; j++) {
-//                    if (currentBoard.getGrid()[i][j] == 0) {
-//                            //copiedBoard = currentBoard.makeCopy();
-//                            board.placeStone(1, j, i);
-//                            int boardValue = alphaBetaValue(board, 1);
-//                            if (boardValue > value) {
-//                                value = boardValue;
-//                                bestMove[0] = j;
-//                                bestMove[1] = i;
-//                            }
-//                            board.removeStone(j, i);
-//                    }
-//                }
-//            }
-//        } else {
-//            value = 1;
-//            for (int i = 0; i < board.n; i++) {
-//                for (int j = 0; j < board.m; j++) {
-//                    if (currentBoard.getGrid()[i][j] == 0) {
-//                            //copiedBoard = currentBoard.makeCopy();
-//                            board.placeStone(-1, j, i);
-//                            int boardValue = alphaBetaValue(board, -1);
-//                            System.out.println("boardis: " + boardValue);
-//                            if (boardValue < value) {
-//                                value = boardValue;
-//                                bestMove[0] = j;
-//                                bestMove[1] = i;
-//                            }
-//                            board.removeStone(j, i);
-//                    }
-//                }
-//            }
-//        }
-//        System.out.println(value);
-//        return bestMove;
-        
+        return bestMove;    
     }
     
     /**
-     *
-     * @param player
-     * @return
+     * Check if this board value is stored in a hashmap, otherwise evaluate value and store.
+     * @return heuristic value
      */
-    public int alphaBetaValue(int player) {
-        if (player ==  1) {
-            return maxValue(-20000000, 20000000, depth);
-        } else {
-            return minValue(-20000000, 20000000, depth);
-        }
-    }
-    
     public int evalBoard() {
         Integer boardValue = this.calculatedValues.get(board.toString());
         if(boardValue == null) {
             boardValue = board.evalBoard();
-            this.calculatedValues.put(board.toString(), boardValue);
+            this.calculatedValues.add(board.toString(), boardValue);
         }
         return boardValue;
     }
     
     /**
-     *
+     * Maximizing part of minimax
      * @param alpha
      * @param beta
-     * @return
+     * @return 
      */
     public int maxValue(int alpha, int beta, int depth) {
         int boardValue = evalBoard();
@@ -219,48 +154,28 @@ public class AiGomoku {
         if (board.checkFull()) {
             return 0;
         }
-
-        
         int v = Integer.MIN_VALUE;
-        
-        Set<int[]> emptySquares = emptySquaresNearOccupied();
-        for (int[] coordinate : emptySquares) {
-            if (board.getGrid()[coordinate[0]][coordinate[1]] == 0) {
-                board.placeStone(1, coordinate[1], coordinate[0]);
+        Coordinate[] emptySquares = emptySquaresNearOccupied();
+        for (Coordinate coordinate : emptySquares) {
+            if (board.getGrid()[coordinate.y][coordinate.x] == 0) {
+                board.placeStone(1, coordinate.x, coordinate.y);
                 int tempValue = minValue(alpha, beta, depth - 1);
-                v = Math.max(v, tempValue);
-                board.removeStone(coordinate[1], coordinate[0]);
-                alpha = Math.max(alpha, v);
+                v = (tempValue > v) ? tempValue : v;
+                board.removeStone(coordinate.x, coordinate.y);
+                alpha = (v > alpha) ? v : alpha;
                 if (alpha >= beta) {
                     return v;
                 }
             }
         }
         return v;
-
-//        for (int i = 0; i < board.n; i++) {
-//            for (int j = 0; j < board.m; j++) {
-//                if (board.getGrid()[i][j] == 0) {
-//                    board.placeStone(1, j, i);
-//                    int tempValue = minValue(alpha, beta, depth);
-//                    v = Math.max(v, tempValue);
-//                    board.removeStone(j, i);
-//                    alpha = Math.max(alpha, v);
-//                    if (alpha >= beta) {
-//                        return v;
-//                    }
-//                    
-//                }
-//            }
-//        }
-//        return v;
     }
     
     /**
-     *
+     * Minimizing part of minimax
      * @param alpha
      * @param beta
-     * @return
+     * @return 
      */
     public int minValue(int alpha, int beta, int depth) {
         int boardValue = evalBoard();
@@ -271,38 +186,19 @@ public class AiGomoku {
             return 0;
         }
         int v = Integer.MAX_VALUE;
-        
-        Set<int[]> emptySquares = emptySquaresNearOccupied();
-        for (int[] coordinate : emptySquares) {
-            if (board.getGrid()[coordinate[0]][coordinate[1]] == 0) {
-                board.placeStone(-1, coordinate[1], coordinate[0]);
+        Coordinate[] emptySquares = emptySquaresNearOccupied();
+        for (Coordinate coordinate : emptySquares) {
+            if (board.getGrid()[coordinate.y][coordinate.x] == 0) {
+                board.placeStone(-1, coordinate.x, coordinate.y);
                 int tempValue = maxValue(alpha, beta, depth - 1);
-                v = Math.min(v, tempValue);
-                board.removeStone(coordinate[1], coordinate[0]);
-                beta = Math.min(beta, v);
+                v = (tempValue < v) ? tempValue : v;
+                board.removeStone(coordinate.x, coordinate.y);
+                beta = (v < beta) ? v : beta;
                 if (beta <= alpha) {
                     return v;
                 }
             }
         }
         return v;
-        
-//        for (int i = 0; i < board.n; i++) {
-//            for (int j = 0; j < board.m; j++) {
-//                if (board.getGrid()[i][j] == 0) {
-//                    board.placeStone(-1, j, i);
-//                    int tempValue = maxValue(alpha, beta, depth);
-//                    v = Math.min(v, tempValue);
-//                    board.removeStone(j, i);
-//                    beta = Math.min(beta, v);
-//                    if (beta <= alpha) {
-//                        return v;
-//                    }
-//                }
-//            }
-//        }
-//        return v;
     }
-    
-    
 }

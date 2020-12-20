@@ -37,6 +37,7 @@ public class Stack {
     
     public int[] pop() {
         int[] coordinate = this.stack[this.top];
+        this.stack[this.top] = null;
         this.top--;
         return coordinate;
     }

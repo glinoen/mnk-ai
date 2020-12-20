@@ -23,7 +23,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import mnkgame.domain.Ai;
 import mnkgame.domain.AiGomoku;
 import mnkgame.domain.GameLogic;
 
@@ -34,7 +33,6 @@ import mnkgame.domain.GameLogic;
 public class MnkGameUi extends Application{
     private GameLogic logic;
     private AiGomoku aiG;
-    private Ai ai;
     private Stage stage;
     
     private Scene gameSetupScene;
@@ -60,15 +58,17 @@ public class MnkGameUi extends Application{
         VBox startPane = new VBox(10);
         VBox inputPane = new VBox(10);
         startPane.setPadding(new Insets(10));
-        Label gridWidthLabel = new Label("Enter grid width (between 3-15)");
+        Label gridWidthLabel = new Label("Enter grid width (between 5-15)");
         TextField gridWidthInput = new TextField();
-        Label gridHeightLabel = new Label("Enter grid height (between 3-15)");
+        Label gridHeightLabel = new Label("Enter grid height (between 5-15)");
         TextField gridHeightInput = new TextField();
-        Label kLabel = new Label("Enter k (smaller than the largest dimension, minimum 3)");
+        Label kLabel = new Label("Enter k (smaller than the largest dimension, minimum 5)");
         TextField kInput = new TextField();
+        Label depthLabel = new Label("Enter depth(recommended 0-3)");
+        TextField depthInput = new TextField();
         CheckBox aiStartCheck = new CheckBox("Ai starts the game(otherwise you start)");
         CheckBox aiCheck = new CheckBox("Ai vs Ai");
-        inputPane.getChildren().addAll(gridWidthLabel, gridWidthInput, gridHeightLabel, gridHeightInput, kLabel, kInput,aiStartCheck, aiCheck);
+        inputPane.getChildren().addAll(gridWidthLabel, gridWidthInput, gridHeightLabel, gridHeightInput, kLabel, kInput,depthLabel, depthInput,aiStartCheck, aiCheck);
         Label errorMessage = new Label();
         
         Button startButton = new Button("Start Game");
@@ -77,15 +77,12 @@ public class MnkGameUi extends Application{
                 int tempGridWidth = Integer.parseInt(gridWidthInput.getText());
                 int tempGridHeight = Integer.parseInt(gridHeightInput.getText());
                 int tempK = Integer.parseInt(kInput.getText());
+                int tempDepth = Integer.parseInt(depthInput.getText());
             
-                if ( tempGridWidth > 2 && tempGridWidth < 16 && tempGridHeight > 2 && tempGridHeight < 16){
-                    if(tempK > 2 && tempK <= max(tempGridWidth, tempGridHeight)) {
-                        logic.newGame(tempGridWidth, tempGridHeight, tempK);
-                        if(tempK > 3) {
-                            this.aiG = new AiGomoku(this.logic, 3);
-                        } else {
-                            this.ai = new Ai(this.logic);
-                        }
+                if ( tempGridWidth > 4 && tempGridWidth < 16 && tempGridHeight > 4 && tempGridHeight < 16){
+                    if(tempK > 4 && tempK <= max(tempGridWidth, tempGridHeight)) {
+                        logic.newGame(tempGridWidth, tempGridHeight, tempK, tempDepth);
+                        this.aiG = logic.getAi();
                         
                         System.out.println("new ai");
                         errorMessage.setText("");
@@ -136,9 +133,15 @@ public class MnkGameUi extends Application{
         System.out.println("current: " + logic.getCurrentPlayer());
         String playerTurn;
 
+        HBox upPane = new HBox(10);
         Label turnLabel = new Label(playerString(logic.getCurrentPlayer()) + "'s turn");
         turnLabel.setFont(equalSizeFont);
-        gamePane.setTop(turnLabel);
+        Button startButton = new Button("New Game");
+        startButton.setOnAction((event) -> {
+                    start(stage);
+                });
+        upPane.getChildren().addAll(turnLabel, startButton);
+        gamePane.setTop(upPane);
         
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -184,11 +187,8 @@ public class MnkGameUi extends Application{
                             turnLabel.setText(playerString(logic.getCurrentPlayer()) + "'s turn");
                             if (logic.getCurrentPlayer() == this.bot) {
                                 int[] aiMove = new int[2];
-                                if(logic.getBoard().k > 4) {
-                                    aiMove = aiG.bestMoveFinder(this.bot);
-                                } else {
-                                    aiMove = ai.bestMoveFinder(this.bot);
-                                }
+                                aiMove = aiG.bestMoveFinder(this.bot);
+
                                 Button buttonAi = buttons[aiMove[0]][aiMove[1]];
                                 buttonAi.fire();
                             }
@@ -217,10 +217,15 @@ public class MnkGameUi extends Application{
         System.out.println("current: " + logic.getCurrentPlayer());
         String playerTurn;
         
-
+        HBox upPane = new HBox(10);
         Label turnLabel = new Label(playerString(logic.getCurrentPlayer()) + "'s turn");
         turnLabel.setFont(equalSizeFont);
-        gamePane.setTop(turnLabel);
+        Button startButton = new Button("New Game");
+        startButton.setOnAction((event) -> {
+                    start(stage);
+                });
+        upPane.getChildren().addAll(turnLabel, startButton);
+        gamePane.setTop(upPane);
         
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -259,7 +264,8 @@ public class MnkGameUi extends Application{
                     if(logic.stonePlacer(xx, yy)) {
                         button.setText(playerString(logic.getCurrentPlayer()));
                         if(logic.checkWin() || logic.checkFull()){
-                            start(stage);
+                            turnLabel.setText("GAME OVER");
+                            //start(stage);
                         } else {
                             logic.changePlayer();
                             turnLabel.setText(playerString(logic.getCurrentPlayer()) + "'s turn");
