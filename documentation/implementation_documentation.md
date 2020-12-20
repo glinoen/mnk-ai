@@ -25,7 +25,7 @@ Time: O(m^(d/2)) Space: O(md), where m is the number of legal moves and d is the
 
 ## Logical structure
 
-![simplestucture][mnksimplelogic.png]
+![simplestucture](mnksimplelogic.png)
 
 ## Pros and cons
 

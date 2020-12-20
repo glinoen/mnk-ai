@@ -5,10 +5,10 @@ Testing is done using JUnit framework. Most of the tests are unit tests. The ai 
 ## Code coverage and static analysis
 
 ### jacoco
-![jacoco][jacoco.jpg]
+![jacoco](jacoco.jpg)
 
 ### checkstyle
-![checkstyle][checkstyle.jpg]
+![checkstyle](checkstyle.jpg)
 
 All of the checkstyle errors are MethodLength errors. I wasn't able to refactor these methods in to smaller pieces
 
