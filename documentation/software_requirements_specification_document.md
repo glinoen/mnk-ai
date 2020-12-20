@@ -4,7 +4,7 @@ AI for a n,m,k game(k-in-a-row on a m x n board) using Java.
 
 ## Algorithms and data structures
 
-Minimax algorithm with alpha-beta pruning and a game tree that is a directed graph.
+Minimax algorithm with alpha-beta pruning and a game tree that is a directed graph. Data structures used: hash map and stack.
 
 ### Problems and solutions
 
